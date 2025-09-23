@@ -1,11 +1,12 @@
 using LittelSword.InputSystem;
+using LittelSword.Interfaces;
 using LittelSword.Player.Controller;
 using UnityEngine;
 using Logger = LittelSword.Common.Logger;
 
 namespace LittelSword.Player
 {
-    public class BasePlayer : MonoBehaviour
+    public class BasePlayer : MonoBehaviour, IDamageable
     {
         // Controllers
         private InputHandler inputHandler;
@@ -16,9 +17,14 @@ namespace LittelSword.Player
         protected Rigidbody2D rb;
         protected SpriteRenderer spriteRenderer;
         protected Animator animator;
+        protected Collider2D collider;
 
         // 플레이어 스탯
-        [SerializeField] protected PlayerStats playerStats;
+        public PlayerStats playerStats;
+
+        // 프로퍼티
+        public bool IsDead => CurrentHP <= 0;
+        public int CurrentHP { get; set; }
 
         #region 유니티 이벤트
         protected void Awake()
@@ -26,8 +32,6 @@ namespace LittelSword.Player
             InitComponents();
             InitControllers();
         }
-
-
 
         protected void OnEnable()
         {
@@ -49,6 +53,7 @@ namespace LittelSword.Player
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             animator = GetComponent<Animator>();
+            collider = GetComponent<Collider2D>();
         }
         private void InitControllers()
         {
@@ -71,6 +76,33 @@ namespace LittelSword.Player
             Logger.Log($"Move:" + direction);
             movementController.Move(direction, playerStats.moveSpeed);
             animationController.Move(direction != Vector2.zero);
+        }
+
+
+        #endregion
+
+        #region 피격관련 메소드
+        public void TakeDamage(int damage)
+        {
+            CurrentHP = Mathf.Max(0, CurrentHP - damage);
+            if(IsDead)
+            {
+                Die();
+            }
+            else
+            {
+                animationController.Hit();
+
+            }
+        }
+
+        public void Die()
+        {
+            animationController.Die();
+
+            inputHandler.enabled = false;
+            collider.enabled = false;
+            rb.linearVelocity = Vector2.zero;
         }
 
         #endregion
