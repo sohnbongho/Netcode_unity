@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Logger = LittelSword.Common.Logger;
 
 namespace LittelSword.InputSystem
 {
@@ -40,8 +41,7 @@ namespace LittelSword.InputSystem
 
         private void HandleMove(InputAction.CallbackContext ctx)
         {
-            Debug.Log($"Move: {ctx.ReadValue<Vector2>()}");
-
+            Logger.Log($"Move: {ctx.ReadValue<Vector2>()}");
         }
 
     }
