@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4733349446256764956}
   - component: {fileID: 1886785085310537730}
   - component: {fileID: 1864796864605351990}
+  - component: {fileID: 1433327846596654119}
   m_Layer: 0
   m_Name: Goblin
   m_TagString: Untagged
@@ -82,7 +83,7 @@ SpriteRenderer:
   m_SortingOrder: 100
   m_Sprite: {fileID: -4230181108591323607, guid: 3d6954d5305bbbb448b345878371083a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 3, y: 3}
@@ -113,3 +114,15 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1433327846596654119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6331786605112564340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f955b640f400ae2459420b3e7a8fa588, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LittelSword.Enemy.Enemy

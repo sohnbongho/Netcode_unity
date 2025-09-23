@@ -10,6 +10,11 @@ namespace LittelSword.Enemy
     {
         // 상태 머시
         private StateMechine stateMechine;
+        public StateMechine StateMechine => stateMechine;
+
+        // 상태 이름(에디터용)
+        public string CurrentStateName => StateMechine?.currentState?.GetType().Name ?? "None";
+
 
         // 상태를 저장할 딕셔너리 선언 초기값 설정
         private Dictionary<Type, IState> states;
@@ -54,9 +59,6 @@ namespace LittelSword.Enemy
         {
             // 상태 머신 갯인
             stateMechine.Update();
-
-            // 테스트 코드
-            TestFSM();
         }
         #endregion
         #region  초기화

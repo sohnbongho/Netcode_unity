@@ -12,7 +12,7 @@ namespace LittelSword.Enemy.FSM
         }
 
         // 현재 상태를 저장할 변수
-        private IState currentState;
+        public IState currentState { get; private set; }
 
         // 상태 전환 메서드
         public void ChangeState(IState newState)
