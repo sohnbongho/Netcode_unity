@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Logger = LittelSword.Common.Logger;
 
 namespace LittelSword.InputSystem
 {
@@ -29,6 +28,7 @@ namespace LittelSword.InputSystem
 
             // 이벤트 연결
             moveAction.performed += HandleMove;
+            attackAction.performed += HandleAttack;
         }
 
         private void OnDisable()
@@ -37,13 +37,18 @@ namespace LittelSword.InputSystem
 
             // 이벤트 해지
             moveAction.performed -= HandleMove;
+            attackAction.performed -= HandleAttack;
         }
 
         private void HandleMove(InputAction.CallbackContext ctx)
         {
-            Logger.Log($"Move: {ctx.ReadValue<Vector2>()}");
+            OnMove?.Invoke(ctx.ReadValue<Vector2>());
         }
 
+        private void HandleAttack(InputAction.CallbackContext obj)
+        {
+            OnAttack?.Invoke();
+        }
     }
 
 }

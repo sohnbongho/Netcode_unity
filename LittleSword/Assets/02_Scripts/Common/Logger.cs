@@ -27,5 +27,4 @@ namespace LittelSword.Common
             Debug.LogWarning(message);
         }
     }
-
 }
