@@ -1,4 +1,5 @@
 using LittelSword.InputSystem;
+using System;
 using UnityEngine;
 using Logger = LittelSword.Common.Logger;
 
@@ -9,11 +10,19 @@ namespace LittelSword.Player
         // Controllers
         private InputHandler inputHandler;
 
+        // Components
+        protected Rigidbody2D rb;
+
+
         #region 유니티 이벤트
         protected void Awake()
         {
+            InitComponents();
             InitControllers();
         }
+
+        
+
         protected void OnEnable()
         {
             inputHandler.OnMove += Move;
@@ -33,6 +42,11 @@ namespace LittelSword.Player
         {
             inputHandler = GetComponent<InputHandler>();
         }
+        private void InitComponents()
+        {
+            rb = GetComponent<Rigidbody2D>();
+
+        }
         #endregion
 
         #region 공통 메소드
@@ -44,6 +58,8 @@ namespace LittelSword.Player
         protected virtual void Move(Vector2 direction)
         {
             Logger.Log($"Move:" + direction);
+            const float speed = 3.0f;
+            rb.linearVelocity = direction * speed;
         }
 
         #endregion

@@ -28,6 +28,7 @@ namespace LittelSword.InputSystem
 
             // 이벤트 연결
             moveAction.performed += HandleMove;
+            moveAction.canceled += HandleMove;
             attackAction.performed += HandleAttack;
         }
 
@@ -37,6 +38,7 @@ namespace LittelSword.InputSystem
 
             // 이벤트 해지
             moveAction.performed -= HandleMove;
+            moveAction.canceled -= HandleMove;
             attackAction.performed -= HandleAttack;
         }
 
