@@ -10,10 +10,12 @@ namespace LittelSword.Player
         // Controllers
         private InputHandler inputHandler;
         private MovementController movementController;
+        private AnimationController animationController;
 
         // Components
         protected Rigidbody2D rb;
         protected SpriteRenderer spriteRenderer;
+        protected Animator animator;
 
 
         #region 유니티 이벤트
@@ -44,11 +46,13 @@ namespace LittelSword.Player
         {
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
+            animator = GetComponent<Animator>();
         }
         private void InitControllers()
         {
             inputHandler = GetComponent<InputHandler>();
             movementController = new MovementController(rb, spriteRenderer);
+            animationController = new AnimationController(animator);
         }
         #endregion
 
@@ -56,6 +60,8 @@ namespace LittelSword.Player
         protected virtual void Attack()
         {
             Logger.Log($"Attack");
+            animationController.Attack();
+           
         }
 
         protected virtual void Move(Vector2 direction)
@@ -63,6 +69,7 @@ namespace LittelSword.Player
             Logger.Log($"Move:" + direction);
             const float speed = 5.0f;
             movementController.Move(direction, speed);
+            animationController.Move(direction != Vector2.zero);
         }
 
         #endregion
