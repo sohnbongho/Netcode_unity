@@ -17,6 +17,8 @@ namespace LittelSword.Player
         protected SpriteRenderer spriteRenderer;
         protected Animator animator;
 
+        // 플레이어 스탯
+        [SerializeField] protected PlayerStats playerStats;
 
         #region 유니티 이벤트
         protected void Awake()
@@ -61,14 +63,13 @@ namespace LittelSword.Player
         {
             Logger.Log($"Attack");
             animationController.Attack();
-           
+
         }
 
         protected virtual void Move(Vector2 direction)
         {
             Logger.Log($"Move:" + direction);
-            const float speed = 5.0f;
-            movementController.Move(direction, speed);
+            movementController.Move(direction, playerStats.moveSpeed);
             animationController.Move(direction != Vector2.zero);
         }
 
