@@ -8,6 +8,7 @@ namespace LittelSword.Enemy.FSM
         public void Enter(Enemy enemy)
         {
             Logger.Log("Idle 진입");
+            enemy.animator.SetBool(Enemy.hashInRun, false);
         }
         public void Update(Enemy enemy)
         {

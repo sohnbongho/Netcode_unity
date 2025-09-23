@@ -8,6 +8,7 @@ namespace LittelSword.Enemy.FSM
         public void Enter(Enemy enemy)
         {
             Logger.Log("AttackState 진입");
+            enemy.animator.SetTrigger(Enemy.hashAttack);
         }
         public void Update(Enemy enemy)
         {
