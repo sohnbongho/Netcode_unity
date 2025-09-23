@@ -84,8 +84,11 @@ namespace LittelSword.Player
         #region 피격관련 메소드
         public void TakeDamage(int damage)
         {
+            if (IsDead)
+                return;
+
             CurrentHP = Mathf.Max(0, CurrentHP - damage);
-            if(IsDead)
+            if (IsDead)
             {
                 Die();
             }
