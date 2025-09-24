@@ -6,6 +6,7 @@ using Logger = LittelSword.Common.Logger;
 
 namespace LittelSword.Player
 {
+    [RequireComponent(typeof(Rigidbody2D), typeof(InputHandler), typeof(CapsuleCollider2D))]
     public class BasePlayer : MonoBehaviour, IDamageable
     {
         // Controllers
@@ -55,7 +56,12 @@ namespace LittelSword.Player
             animator = GetComponent<Animator>();
             collider = GetComponent<Collider2D>();
 
+            rb.gravityScale = 0.0f;
+            rb.freezeRotation = true;
+
             CurrentHP = playerStats.maxHp;
+
+
         }
         private void InitControllers()
         {
