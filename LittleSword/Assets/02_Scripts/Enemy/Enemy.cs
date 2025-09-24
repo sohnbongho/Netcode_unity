@@ -26,7 +26,7 @@ namespace LittelSword.Enemy
         [NonSerialized] public Animator animator;
 
         // 애니메이션 해시 추출
-        public static readonly int hashInRun = Animator.StringToHash("IsRun");
+        public static readonly int hashIsRun = Animator.StringToHash("IsRun");
         public static readonly int hashAttack = Animator.StringToHash("Attack");
         public static readonly int hashDie = Animator.StringToHash("Die");
         public static readonly int hashHit = Animator.StringToHash("Hit");
@@ -64,6 +64,35 @@ namespace LittelSword.Enemy
             return false;
         }
 
+        // 추적로직
+        public void MoveToPlayer()
+        {
+            if (target == null)
+                return;
+
+            // 이동 방향 계산
+            Vector2 direction = (target.position - transform.position).normalized;
+
+            // Target의 위치에 따라서 스프라이트 Flip
+            spriteRenderer.flipX = direction.x < 0;
+            rb.linearVelocity = direction * enemyStats.moveSpeed;
+
+        }
+        public void StopMoving()
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        // 공격 사정거리 이내에 있는 확인
+        public bool IsInAttackRange()
+        {
+            if (target == null)
+                return false;
+
+            float targetDistance = (transform.position - target.position).sqrMagnitude;
+            return targetDistance <= (enemyStats.attackDistance * enemyStats.attackDistance);
+        }
+
         #endregion
         #region 유니티 이벤트
         private void Awake()
@@ -92,9 +121,9 @@ namespace LittelSword.Enemy
         {
             states = new Dictionary<Type, IState>
             {
-                [typeof(IdleState)] = new IdleState(),
-                [typeof(ChaseState)] = new ChaseState(),
-                [typeof(AttackState)] = new AttackState()
+                [typeof(IdleState)] = new IdleState(enemyStats.detectInterval),
+                [typeof(ChaseState)] = new ChaseState(enemyStats.detectInterval),
+                [typeof(AttackState)] = new AttackState(enemyStats.attackCooldown)
             };
         }
         private void InitComponents()
@@ -102,6 +131,10 @@ namespace LittelSword.Enemy
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             animator = GetComponent<Animator>();
+
+            // 물리 관련 처리
+            rb.gravityScale = 0.0f;
+            rb.freezeRotation = true;
         }
         #endregion
 
@@ -127,7 +160,7 @@ namespace LittelSword.Enemy
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(transform.position, 
+            Gizmos.DrawWireSphere(transform.position,
                 enemyStats.chaseDistance);
 
             Gizmos.color = Color.red;
