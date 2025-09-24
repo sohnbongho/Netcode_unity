@@ -13,6 +13,10 @@ namespace LittelSword.Enemy.FSM
         public void Update(Enemy enemy)
         {
             Logger.Log("ChaseState 갱신");
+            if (!enemy.DetectPlayer())
+            {                
+                enemy.ChangeState<IdleState>();
+            }
         }
         public void Exit(Enemy enemy)
         {

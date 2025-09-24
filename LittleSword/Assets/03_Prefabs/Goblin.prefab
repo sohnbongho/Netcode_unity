@@ -126,3 +126,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f955b640f400ae2459420b3e7a8fa588, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LittelSword.Enemy.Enemy
+  enemyStats: {fileID: 11400000, guid: 6953f078851a4be4fa91419a79c31cd6, type: 2}
+  target: {fileID: 0}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 8

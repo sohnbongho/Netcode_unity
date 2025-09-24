@@ -1,6 +1,7 @@
 using LittelSword.Enemy.FSM;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -30,7 +31,14 @@ namespace LittelSword.Enemy
         public static readonly int hashDie = Animator.StringToHash("Die");
         public static readonly int hashHit = Animator.StringToHash("Hit");
 
-        #region 상태관련 메소드
+        // Enemy Stats
+        [SerializeField] private EnemyStats enemyStats;
+
+        // 추적 대상
+        [SerializeField] private Transform target;
+        public LayerMask playerLayer;
+
+        #region 상태 관련 메소드
         public void ChangeState<T>() where T : IState
         {
             if (states.TryGetValue(typeof(T), out IState newState))
@@ -38,6 +46,24 @@ namespace LittelSword.Enemy
                 stateMechine.ChangeState(newState);
             }
         }
+
+        // 주인공을 검출하는 메소드
+        public bool DetectPlayer()
+        {
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position,
+                enemyStats.chaseDistance, playerLayer);
+            if (colliders.Length > 0)
+            {
+                target = colliders
+                    .OrderBy(c => (transform.position - c.transform.position).sqrMagnitude)
+                    .First()
+                    .transform;
+                return target != null;
+            }
+            target = null;
+            return false;
+        }
+
         #endregion
         #region 유니티 이벤트
         private void Awake()
@@ -94,6 +120,19 @@ namespace LittelSword.Enemy
             {
                 ChangeState<AttackState>();
             }
+        }
+        #endregion
+
+        #region Gizmos
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(transform.position, 
+                enemyStats.chaseDistance);
+
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position,
+                enemyStats.attackDistance);
         }
         #endregion
     }
