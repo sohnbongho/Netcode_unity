@@ -18,7 +18,7 @@ namespace LittelSword.Player
         protected Rigidbody2D rb;
         protected SpriteRenderer spriteRenderer;
         protected Animator animator;
-        protected Collider2D collider;
+        protected Collider2D _collider;
 
         // 플레이어 스탯
         public PlayerStats playerStats;
@@ -54,7 +54,7 @@ namespace LittelSword.Player
             rb = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             animator = GetComponent<Animator>();
-            collider = GetComponent<Collider2D>();
+            _collider = GetComponent<Collider2D>();
 
             rb.gravityScale = 0.0f;
             rb.freezeRotation = true;
@@ -112,7 +112,7 @@ namespace LittelSword.Player
             animationController.Die();
 
             inputHandler.enabled = false;
-            collider.enabled = false;
+            _collider.enabled = false;
             rb.linearVelocity = Vector2.zero;
         }
 
