@@ -1,4 +1,5 @@
 ﻿
+using LittelSword.Player;
 using UnityEngine;
 using Logger = LittelSword.Common.Logger;
 
@@ -28,6 +29,14 @@ namespace LittelSword.Enemy.FSM
             if (Time.time - lastAttackTime >= attackCooldown)
             {
                 lastAttackTime = Time.time;
+
+                // 타겟이 없거나 또는 사망했을 경우, Idle상태로 전환
+                if (enemy.Target == null || enemy.Target.GetComponent<BasePlayer>()?.IsDead == true)
+                {
+                    Logger.Log("AttackState 갱신");
+                    enemy.ChangeState<IdleState>();
+                    return;
+                }
 
                 if (enemy.IsInAttackRange())
                 {

@@ -1,4 +1,5 @@
 using LittelSword.Enemy.FSM;
+using LittelSword.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,7 @@ namespace LittelSword.Enemy
 
         // 추적 대상
         [SerializeField] private Transform target;
+        public Transform Target => target;
         public LayerMask playerLayer;
 
         #region 상태 관련 메소드
@@ -166,6 +168,17 @@ namespace LittelSword.Enemy
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position,
                 enemyStats.attackDistance);
+        }
+        #endregion
+
+        #region 애니메이션 이벤트
+        // 공격 애니메이션에서 호출할 메소드
+        public void OnAttackAnimationEvent()
+        {
+            if (target == null)
+                return;
+
+            target.GetComponent<IDamageable>().TakeDamage(enemyStats.attackDamage);
         }
         #endregion
     }

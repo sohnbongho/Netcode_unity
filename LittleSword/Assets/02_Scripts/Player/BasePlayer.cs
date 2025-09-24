@@ -54,6 +54,8 @@ namespace LittelSword.Player
             spriteRenderer = GetComponent<SpriteRenderer>();
             animator = GetComponent<Animator>();
             collider = GetComponent<Collider2D>();
+
+            CurrentHP = playerStats.maxHp;
         }
         private void InitControllers()
         {
