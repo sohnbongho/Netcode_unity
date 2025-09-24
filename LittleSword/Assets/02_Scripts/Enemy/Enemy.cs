@@ -1,5 +1,6 @@
 using LittelSword.Enemy.FSM;
 using LittelSword.Interfaces;
+using LittelSword.Player;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using UnityEngine.InputSystem;
 
 namespace LittelSword.Enemy
 {
-    public class Enemy : MonoBehaviour
+    public class Enemy : MonoBehaviour, IDamageable
     {
         // 상태 머시
         private StateMechine stateMechine;
@@ -37,12 +38,23 @@ namespace LittelSword.Enemy
 
         // 추적 대상
         [SerializeField] private Transform target;
-        public Transform Target => target;
         public LayerMask playerLayer;
+
+        // 프로퍼티
+        public Transform Target => target;
+        public bool IsDead => CurrentHP <= 0;
+
+        public int CurrentHP { get; private set; }
 
         #region 상태 관련 메소드
         public void ChangeState<T>() where T : IState
         {
+            // 사망상태에서 다른 상태로 전이 불가
+            if (IsDead && typeof(DieState) != typeof(T))
+            {
+                return;
+            }
+
             if (states.TryGetValue(typeof(T), out IState newState))
             {
                 stateMechine.ChangeState(newState);
@@ -58,8 +70,9 @@ namespace LittelSword.Enemy
             {
                 target = colliders
                     .OrderBy(c => (transform.position - c.transform.position).sqrMagnitude)
-                    .First()
-                    .transform;
+                    .Where(c => c.GetComponent<BasePlayer>()?.IsDead == false)
+                    .First()?
+                    .transform ?? null;
                 return target != null;
             }
             target = null;
@@ -125,7 +138,8 @@ namespace LittelSword.Enemy
             {
                 [typeof(IdleState)] = new IdleState(enemyStats.detectInterval),
                 [typeof(ChaseState)] = new ChaseState(enemyStats.detectInterval),
-                [typeof(AttackState)] = new AttackState(enemyStats.attackCooldown)
+                [typeof(AttackState)] = new AttackState(enemyStats.attackCooldown),
+                [typeof(DieState)] = new DieState()
             };
         }
         private void InitComponents()
@@ -137,6 +151,8 @@ namespace LittelSword.Enemy
             // 물리 관련 처리
             rb.gravityScale = 0.0f;
             rb.freezeRotation = true;
+
+            CurrentHP = enemyStats.maxHp;
         }
         #endregion
 
@@ -179,6 +195,31 @@ namespace LittelSword.Enemy
                 return;
 
             target.GetComponent<IDamageable>().TakeDamage(enemyStats.attackDamage);
+        }
+
+        #endregion
+
+        #region 데미지 처리
+        public void TakeDamage(int damage)
+        {
+            if (IsDead)
+                return;
+
+            // 데미지 처리
+            CurrentHP -= damage;
+            if (IsDead)
+            {
+                Die();
+            }
+            else
+            {
+                animator.SetTrigger(hashHit);
+            }
+        }
+
+        public void Die()
+        {
+            ChangeState<DieState>();
         }
         #endregion
     }

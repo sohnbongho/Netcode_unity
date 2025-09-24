@@ -142,6 +142,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LittelSword.Player.Warrior
   playerStats: {fileID: 11400000, guid: 19fcd774cc0b99240bf87cb232fde525, type: 2}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  size: {x: 1, y: 2}
+  offset: {x: 0.5, y: 0}
 --- !u!50 &3333641356129070797
 Rigidbody2D:
   serializedVersion: 5
