@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyStats
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStats
   maxHp: 100
-  moveSpeed: 1.5
+  moveSpeed: 0
   detectInterval: 0.3
   chaseDistance: 5
   attackDistance: 1.5
