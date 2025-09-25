@@ -53,7 +53,7 @@ namespace LittleSword.Network.LobbyUI
                 lobbyNameInput.text = CurrentLobby.Name;
                 lobbyCodeInput.text = CurrentLobby.LobbyCode;
 
-                Logger.Log($"로비 생성 완료: {CurrentLobby.Name}, {CurrentLobby.LobbyCode}");
+                Logger.Log($"로비 생성 완료: {CurrentLobby.Name}/{CurrentLobby.LobbyCode}");
             }
             catch (Exception ex)
             {
