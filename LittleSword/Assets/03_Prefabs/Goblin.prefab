@@ -11,12 +11,13 @@ GameObject:
   - component: {fileID: 4733349446256764956}
   - component: {fileID: 1886785085310537730}
   - component: {fileID: 1864796864605351990}
+  - component: {fileID: 2558531922736084872}
   - component: {fileID: 1433327846596654119}
   - component: {fileID: 6310531709122137971}
   - component: {fileID: 7732167289762913623}
-  - component: {fileID: 2558531922736084872}
   - component: {fileID: -8494463053562910243}
   - component: {fileID: -5844047482258453742}
+  - component: {fileID: -9167523050671357467}
   m_Layer: 6
   m_Name: Goblin
   m_TagString: Enemy
@@ -119,6 +120,31 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2558531922736084872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6331786605112564340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 415388789
+  InScenePlacedSourceGlobalObjectIdHash: 415388789
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &1433327846596654119
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,6 +157,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f955b640f400ae2459420b3e7a8fa588, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LittelSword.Enemy.Enemy
+  ShowTopMostFoldoutHeaderGroup: 1
   enemyStats: {fileID: 11400000, guid: 6953f078851a4be4fa91419a79c31cd6, type: 2}
   target: {fileID: 0}
   playerLayer:
@@ -200,31 +227,6 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 1.07, y: 1.35}
   m_Direction: 0
---- !u!114 &2558531922736084872
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6331786605112564340}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1165548735
-  InScenePlacedSourceGlobalObjectIdHash: 415388789
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
 --- !u!114 &-8494463053562910243
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,3 +290,18 @@ MonoBehaviour:
   UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
+--- !u!114 &-9167523050671357467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6331786605112564340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  ShowTopMostFoldoutHeaderGroup: 1
+  TransitionStateInfoList: []
+  m_Animator: {fileID: 1864796864605351990}

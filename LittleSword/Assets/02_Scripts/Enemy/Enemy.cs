@@ -4,12 +4,14 @@ using LittelSword.Player;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Logger = LittelSword.Common.Logger;
 
 namespace LittelSword.Enemy
 {
-    public class Enemy : MonoBehaviour, IDamageable
+    public class Enemy : NetworkBehaviour, IDamageable
     {
         // 상태 머시
         private StateMechine stateMechine;
@@ -46,9 +48,21 @@ namespace LittelSword.Enemy
 
         public int CurrentHP { get; private set; }
 
+        #region 네트워크 변수 선언
+        NetworkVariable<bool> networkIsFacingRight = new NetworkVariable<bool>
+            (
+            true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server
+            );
+        #endregion
+
+
         #region 상태 관련 메소드
         public void ChangeState<T>() where T : IState
         {
+            // 서버에서만 상태 변경 가능
+            if (!IsServer)
+                return;
+
             // 사망상태에서 다른 상태로 전이 불가
             if (IsDead && typeof(DieState) != typeof(T))
             {
@@ -92,7 +106,10 @@ namespace LittelSword.Enemy
             spriteRenderer.flipX = direction.x < 0;
             rb.linearVelocity = direction * enemyStats.moveSpeed;
 
+            // 네트워크 변수 저장
+            networkIsFacingRight.Value = !spriteRenderer.flipX;
         }
+
         public void StopMoving()
         {
             rb.linearVelocity = Vector2.zero;
@@ -114,6 +131,11 @@ namespace LittelSword.Enemy
         {
             InitState();
             InitComponents();
+
+            networkIsFacingRight.OnValueChanged += (value, newVlaue) =>
+            {
+                spriteRenderer.flipX = !newVlaue;
+            };
         }
 
 
@@ -127,6 +149,10 @@ namespace LittelSword.Enemy
         }
         private void Update()
         {
+            // 서버에서만 상태 변경 가능
+            if (!IsServer)
+                return;
+
             // 상태 머신 갯인
             stateMechine.Update();
         }
@@ -191,15 +217,46 @@ namespace LittelSword.Enemy
         // 공격 애니메이션에서 호출할 메소드
         public void OnAttackAnimationEvent()
         {
+            if(!IsServer)
+                return;
+
             if (target == null)
                 return;
 
-            target.GetComponent<IDamageable>().TakeDamage(enemyStats.attackDamage);
+            //target.GetComponent<IDamageable>().TakeDamage(enemyStats.attackDamage);
+
+            // RPC호출 (Remote Procedure Call) 방식으로 처리
+            // ClientRpC : Server -> Client
+            // ServerRpC : Server <- Client
+            // RPC(SendTo.All) : 모두에게 전송
+
+            // 주의: 반드시 메소드명 접미가 ..ClientRpC, ..ServerRpC처럼
+            // 이와 같은 이름이어야 한다.
+            ulong targetId = target.GetComponent<NetworkObject>().NetworkObjectId;
+            //TakeDamageClientRpc(targetId, enemyStats.attackDamage);
+            TakeDamageRpc(targetId, enemyStats.attackDamage);
         }
 
+        //[ClientRpc]
+        //private void TakeDamageClientRpc(ulong targetId, int damage)
+        //{
+        //    Logger.Log($"RPC 수신 : {targetId}, {damage}");
+        //    NetworkObject targetObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[targetId];
+        //    targetObject.GetComponent<IDamageable>().TakeDamage(damage);
+
+        //}
+
+        [Rpc(SendTo.Everyone)]
+        private void TakeDamageRpc(ulong targetId, int damage)
+        {
+            Logger.Log($"RPC 수신 : {targetId}, {damage}");
+            NetworkObject targetObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[targetId];
+            targetObject.GetComponent<IDamageable>().TakeDamage(damage);
+
+        }
         #endregion
 
-        #region 데미지 처리
+            #region 데미지 처리
         public void TakeDamage(int damage)
         {
             if (IsDead)
