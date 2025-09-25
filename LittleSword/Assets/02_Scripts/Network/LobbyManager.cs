@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
@@ -20,6 +21,8 @@ namespace LittleSword.Network.LobbyUI
         [SerializeField] private Button leaveLobbyButton;
 
         private Lobby CurrentLobby;
+        private bool IsHost => CurrentLobby != null &&
+            CurrentLobby.HostId == AuthenticationService.Instance.PlayerId;
 
         #region 유니티 이벤트
         private async void Awake()
@@ -51,6 +54,9 @@ namespace LittleSword.Network.LobbyUI
             joinLobbyButton.onClick.RemoveAllListeners();
             quitJoinLobbyButton.onClick.RemoveAllListeners();
             leaveLobbyButton.onClick.RemoveAllListeners();
+
+            CancelInvoke(nameof(SendHeartbeatAsync));
+            CancelInvoke(nameof(PollingLobbyAsync));
         }
 
         #endregion
@@ -63,6 +69,13 @@ namespace LittleSword.Network.LobbyUI
             {
                 CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers);
                 DisplayCurrenLobby();
+                BindingLobbyCallbacks();
+
+                if (IsHost)
+                {
+                    InvokeRepeating(nameof(SendHeartbeatAsync), 5f, 5f);
+                    InvokeRepeating(nameof(PollingLobbyAsync), 3f, 3f);
+                }
             }
             catch (Exception ex)
             {
@@ -104,7 +117,7 @@ namespace LittleSword.Network.LobbyUI
         {
             try
             {
-                await LobbyService.Instance.RemovePlayerAsync(CurrentLobby.Id, 
+                await LobbyService.Instance.RemovePlayerAsync(CurrentLobby.Id,
                     AuthenticationService.Instance.PlayerId);
                 ClearCurrentLobby();
             }
@@ -129,7 +142,59 @@ namespace LittleSword.Network.LobbyUI
         {
             lobbyNameInput.text = "";
             lobbyCodeInput.text = "";
-            
+
+        }
+        #endregion
+
+        #region 로비 유지 관련 메소드
+
+        // Heatbeat 전송 로직(30초 미만으로 호출)
+        private async void SendHeartbeatAsync()
+        {
+            if (CurrentLobby == null)
+                return;
+
+            await LobbyService.Instance.SendHeartbeatPingAsync(CurrentLobby.Id);
+            Logger.Log("Heartbeat 전송 성공");
+        }
+
+        // 로비 정보 갱신
+        private async void PollingLobbyAsync()
+        {
+            if (CurrentLobby == null)
+                return;
+
+            CurrentLobby = await LobbyService.Instance.GetLobbyAsync(CurrentLobby.Id);
+            Logger.Log($"로비 정보 갱신: {CurrentLobby.Name}. 접속자 수:{CurrentLobby.Players.Count}");
+        }
+        #endregion
+
+        #region 로비 콜백
+        private void BindingLobbyCallbacks()
+        {
+            // 로비 콜백에 연결한 이벤트를 선언
+            LobbyEventCallbacks callbacks = new LobbyEventCallbacks();
+            callbacks.PlayerJoined += OnPlayerJoined;
+            callbacks.PlayerLeft += OnPlayerLeft;
+
+            // 로비 콜백 이벤트 연결
+            LobbyService.Instance.SubscribeToLobbyEventsAsync(CurrentLobby.Id, callbacks);
+        }
+
+        private void OnPlayerLeft(List<int> playerIds)
+        {
+            foreach (var playerId in playerIds)
+            {
+                Logger.Log($"플레이어 떠남: {playerId}");
+            }
+        }
+
+        private void OnPlayerJoined(List<LobbyPlayerJoined> players)
+        {
+            foreach (var player in players)
+            {
+                Logger.Log($"플레이어 접속: {player.Player.Id}");
+            }
         }
         #endregion
     }
