@@ -17,7 +17,8 @@ GameObject:
   - component: {fileID: 4570690061687466977}
   - component: {fileID: 8043576875483801635}
   - component: {fileID: 700511762040141588}
-  - component: {fileID: 1917903812899468059}
+  - component: {fileID: -6817608885835239988}
+  - component: {fileID: 383555971050912710}
   m_Layer: 3
   m_Name: Warrior
   m_TagString: Untagged
@@ -226,7 +227,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 671722439
+  GlobalObjectIdHash: 448579956
   InScenePlacedSourceGlobalObjectIdHash: 448579956
   DeferredDespawnTick: 0
   Ownership: 1
@@ -285,7 +286,7 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &1917903812899468059
+--- !u!114 &-6817608885835239988
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -294,9 +295,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 4757538202525573553}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
+  m_Script: {fileID: 11500000, guid: c1f385632d1cdbb4f948a2a5e62f19a1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
+  m_EditorClassIdentifier: Assembly-CSharp::LittelSword.Network.NetworkPlayer
+  ShowTopMostFoldoutHeaderGroup: 1
+  basePlayer: {fileID: 0}
+  networkTransform: {fileID: 0}
+--- !u!114 &383555971050912710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4757538202525573553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5fee1df750f95648a12b100b33b4620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LittelSword.Network.OwnerNetworkAnimator
   ShowTopMostFoldoutHeaderGroup: 1
   TransitionStateInfoList: []
   m_Animator: {fileID: 6719353391166588591}
