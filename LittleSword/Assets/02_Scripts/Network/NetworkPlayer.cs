@@ -5,6 +5,8 @@ using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
 
+[RequireComponent(typeof(NetworkObject), typeof(NetworkRigidbody2D), typeof(NetworkTransform))]
+[RequireComponent(typeof(OwnerNetworkAnimator))]
 public class NetworkPlayer : NetworkBehaviour
 {
     [SerializeField] private BasePlayer basePlayer;
@@ -72,6 +74,7 @@ public class NetworkPlayer : NetworkBehaviour
         }
         else
         {
+            spriteRenderer.flipX = !networkIsFacingRight.Value;
             inputHandler.enabled = false;
             basePlayer.enabled = false;
         }
