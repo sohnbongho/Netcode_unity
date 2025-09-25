@@ -34,11 +34,23 @@ namespace LittleSword.Network.LobbyUI
         {
             createLobbyButton.onClick.AddListener(
                 () => CreateLobbyAsync(lobbyNameInput.text, 4));
+
+            joinLobbyButton.onClick.AddListener(
+                () => JoinLobbyAsync(lobbyCodeInput.text));
+
+            quitJoinLobbyButton.onClick.AddListener(
+                () => QuitJoinLobbyAsync());
+
+            leaveLobbyButton.onClick.AddListener(
+                () => LeaveLobbyAsync());
         }
 
         private void OnDisable()
         {
             createLobbyButton.onClick.RemoveAllListeners();
+            joinLobbyButton.onClick.RemoveAllListeners();
+            quitJoinLobbyButton.onClick.RemoveAllListeners();
+            leaveLobbyButton.onClick.RemoveAllListeners();
         }
 
         #endregion
@@ -50,10 +62,7 @@ namespace LittleSword.Network.LobbyUI
             try
             {
                 CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers);
-                lobbyNameInput.text = CurrentLobby.Name;
-                lobbyCodeInput.text = CurrentLobby.LobbyCode;
-
-                Logger.Log($"로비 생성 완료: {CurrentLobby.Name}/{CurrentLobby.LobbyCode}");
+                DisplayCurrenLobby();
             }
             catch (Exception ex)
             {
@@ -61,13 +70,67 @@ namespace LittleSword.Network.LobbyUI
             }
         }
 
-
         //로비 조인
+        private async void JoinLobbyAsync(string lobbyCode)
+        {
+            try
+            {
+                CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
+                DisplayCurrenLobby();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message);
+            }
+        }
 
         // 퀵조인
+        private async void QuitJoinLobbyAsync()
+        {
+            try
+            {
+                CurrentLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+                DisplayCurrenLobby();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message);
+            }
+
+        }
 
         // 로비 나가기
+        private async void LeaveLobbyAsync()
+        {
+            try
+            {
+                await LobbyService.Instance.RemovePlayerAsync(CurrentLobby.Id, 
+                    AuthenticationService.Instance.PlayerId);
+                ClearCurrentLobby();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message);
+            }
 
+        }
+
+        private void DisplayCurrenLobby()
+        {
+            if (CurrentLobby == null)
+                return;
+
+            lobbyNameInput.text = CurrentLobby.Name;
+            lobbyCodeInput.text = CurrentLobby.LobbyCode;
+
+            Logger.Log($"로비 접속정보 : {CurrentLobby.Name}/{CurrentLobby.LobbyCode}");
+        }
+        private void ClearCurrentLobby()
+        {
+            lobbyNameInput.text = "";
+            lobbyCodeInput.text = "";
+            
+        }
         #endregion
     }
 
