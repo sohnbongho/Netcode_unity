@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using Logger = LittelSword.Common.Logger;
@@ -13,12 +17,15 @@ namespace LittleSword.Network.LobbyUI
 {
     public class LobbyManager : MonoBehaviour
     {
+        private const string KEY_RELAY_JOIN_CODE = "RelayJoinCode";
+
         [SerializeField] private TMP_InputField lobbyNameInput;
         [SerializeField] private TMP_InputField lobbyCodeInput;
         [SerializeField] private Button createLobbyButton;
         [SerializeField] private Button joinLobbyButton;
         [SerializeField] private Button quitJoinLobbyButton;
         [SerializeField] private Button leaveLobbyButton;
+        [SerializeField] private Button startGameButton;
 
         private Lobby CurrentLobby;
         private bool IsHost => CurrentLobby != null &&
@@ -31,8 +38,13 @@ namespace LittleSword.Network.LobbyUI
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
             Logger.Log($"익명 로그인 성공: Player Id : {AuthenticationService.Instance.PlayerId}");
-
         }
+
+        private void Start()
+        {
+            startGameButton.interactable = false;
+        }
+
         private void OnEnable()
         {
             createLobbyButton.onClick.AddListener(
@@ -62,14 +74,39 @@ namespace LittleSword.Network.LobbyUI
         #endregion
 
         #region 로비 관련 메소드
-        //로비 생성
+        // 로비 생성
+        // # 1. Relay 서버 할당
         private async void CreateLobbyAsync(string lobbyName, int maxPlayers)
         {
             try
             {
-                CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers);
+                // #1 릴레이 서버 할당
+                var relayAlloc = await RelayService.Instance.CreateAllocationAsync(maxPlayers);
+                // #2 Join Code 생성
+                var relayJoinCode = await RelayService.Instance.GetJoinCodeAsync(relayAlloc.AllocationId);
+                Logger.Log($"Relay 할당 성공: {relayJoinCode}");
+                // #3. 통신 방식 설정
+                var relayServerData = relayAlloc.ToRelayServerData("dtls"); // 보안 프로토콜 : UDP 베이스
+                var utp = NetworkManager.Singleton.GetComponent<UnityTransport>();
+                utp.SetRelayServerData(relayServerData);
+                // #4 로비 옵션 생성
+                var lobbyOptions = new CreateLobbyOptions
+                {
+                    Data = new Dictionary<string, DataObject>
+                    {
+                        [KEY_RELAY_JOIN_CODE] = new DataObject(
+                            DataObject.VisibilityOptions.Member, relayJoinCode
+                            )
+                    }
+                };
+
+                // #5 로비 생성 With Options
+                CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, lobbyOptions);
                 DisplayCurrenLobby();
                 BindingLobbyCallbacks();
+
+                // 로비를 생성한 유저가 Host
+                NetworkManager.Singleton.StartHost();
 
                 if (IsHost)
                 {
