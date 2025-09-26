@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -10,6 +11,7 @@ using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Logger = LittelSword.Common.Logger;
 
@@ -18,6 +20,7 @@ namespace LittleSword.Network.LobbyUI
     public class LobbyManager : MonoBehaviour
     {
         private const string KEY_RELAY_JOIN_CODE = "RelayJoinCode";
+        private const string BATTLE_SCENE_NAME = "Level01";
 
         [SerializeField] private TMP_InputField lobbyNameInput;
         [SerializeField] private TMP_InputField lobbyCodeInput;
@@ -58,6 +61,9 @@ namespace LittleSword.Network.LobbyUI
 
             leaveLobbyButton.onClick.AddListener(
                 () => LeaveLobbyAsync());
+
+            startGameButton.onClick.AddListener(
+                () => GameStart());
         }
 
         private void OnDisable()
@@ -66,6 +72,7 @@ namespace LittleSword.Network.LobbyUI
             joinLobbyButton.onClick.RemoveAllListeners();
             quitJoinLobbyButton.onClick.RemoveAllListeners();
             leaveLobbyButton.onClick.RemoveAllListeners();
+            startGameButton.onClick.RemoveAllListeners();
 
             CancelInvoke(nameof(SendHeartbeatAsync));
             CancelInvoke(nameof(PollingLobbyAsync));
@@ -110,6 +117,7 @@ namespace LittleSword.Network.LobbyUI
 
                 if (IsHost)
                 {
+                    startGameButton.interactable = true;
                     InvokeRepeating(nameof(SendHeartbeatAsync), 5f, 5f);
                     InvokeRepeating(nameof(PollingLobbyAsync), 3f, 3f);
                 }
@@ -127,6 +135,11 @@ namespace LittleSword.Network.LobbyUI
             {
                 CurrentLobby = await LobbyService.Instance.JoinLobbyByCodeAsync(lobbyCode);
                 DisplayCurrenLobby();
+
+                // Relay 설정
+                await RelaySetup(CurrentLobby);                
+                // 클라이어트 가동
+                NetworkManager.Singleton.StartClient();
             }
             catch (Exception ex)
             {
@@ -141,6 +154,11 @@ namespace LittleSword.Network.LobbyUI
             {
                 CurrentLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
                 DisplayCurrenLobby();
+
+                // Relay 설정
+                await RelaySetup(CurrentLobby);
+                // 클라이어트 가동
+                NetworkManager.Singleton.StartClient();
             }
             catch (Exception ex)
             {
@@ -162,7 +180,6 @@ namespace LittleSword.Network.LobbyUI
             {
                 Logger.LogError(ex.Message);
             }
-
         }
 
         private void DisplayCurrenLobby()
@@ -233,6 +250,45 @@ namespace LittleSword.Network.LobbyUI
                 Logger.Log($"플레이어 접속: {player.Player.Id}");
             }
         }
+        #endregion
+
+        #region Relay 관련 메소드
+        private async Task RelaySetup(Lobby currentLobby)
+        {
+            try
+            {
+                // #1 - Relay JoinCode
+                string joinCode = currentLobby.Data[KEY_RELAY_JOIN_CODE].Value;
+
+                // #2 - Relay Allocation 
+                JoinAllocation joinAlloc = await RelayService.Instance.JoinAllocationAsync(joinCode);
+
+                // #3 - 통신 방식 설정
+                var relayServerData = joinAlloc.ToRelayServerData("dtls");
+                var utp = NetworkManager.Singleton.GetComponent<UnityTransport>();
+                utp.SetRelayServerData(relayServerData);
+
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ex.Message);
+            }
+        }
+
+        private async void GameStart()
+        {
+            try
+            {
+                NetworkManager.Singleton.SceneManager.LoadScene(BATTLE_SCENE_NAME,
+                    LoadSceneMode.Single);
+
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ex.Message);
+            }
+        }
+
         #endregion
     }
 
