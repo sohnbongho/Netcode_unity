@@ -1,5 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
+using Logger = LittelSword.Common.Logger;
+using Random = UnityEngine.Random;
 
 namespace LittelSword.Network
 {
@@ -7,10 +9,63 @@ namespace LittelSword.Network
     {
         [SerializeField] private GameObject enemyPrefab;
         [SerializeField] private Transform[] spawnPoints;
+        [SerializeField] private GameObject playerPrefab;
 
         private void Start()
         {
-            NetworkManager.Singleton.OnServerStarted += SpawnEnemies;
+            if (NetworkManager.Singleton.IsServer)
+            {
+                SpawnEnemies();
+                SpawnPlayers();
+
+                // 새로 연결되는 클라이언트 콜백
+                NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            }
+
+            //NetworkManager.Singleton.OnServerStarted += SpawnEnemies;
+        }
+        private void OnDestroy()
+        {
+            if (NetworkManager.Singleton == null)
+                return;
+
+            if (NetworkManager.Singleton.IsServer)
+            {
+                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            }
+        }
+        private void OnClientConnected(ulong playerId)
+        {
+            Logger.Log($"클라이언트 접속:{playerId}");
+            SpawnPlayer(playerId);
+        }
+
+        private void SpawnPlayers()
+        {
+            Logger.Log($"접속 플레이어 수 : {NetworkManager.Singleton.ConnectedClients.Count}");
+
+            foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                var spawnPosition = new Vector3(
+                    Random.Range(-2f, 2f),
+                    Random.Range(-2f, 2f),
+                    0);
+                var player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+
+                player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
+            }
+        }
+        private void SpawnPlayer(ulong playerId)
+        {
+            Logger.Log($"접속 플레이어 수 : {NetworkManager.Singleton.ConnectedClients.Count}");
+
+            var spawnPosition = new Vector3(
+                    Random.Range(-2f, 2f),
+                    Random.Range(-2f, 2f),
+                    0);
+            var player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
+
+            player.GetComponent<NetworkObject>().SpawnAsPlayerObject(playerId);
         }
 
         private void SpawnEnemies()
