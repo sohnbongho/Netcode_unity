@@ -19,6 +19,8 @@ namespace LittelSword.Network
         private const string BATTLE_SCENE_NAME = "Level01";
         private const string LOBBY_SCENE_NAME = "Lobby";
 
+        public event Action<string, string> OnUpdateSessionInfo;
+
         #region 유니티 이벤트
         private async void Start()
         {
@@ -51,6 +53,8 @@ namespace LittelSword.Network
 
                 // 세션 생성 및 호스트 시작
                 ActiveSession = await MultiplayerService.Instance.CreateSessionAsync(options);
+
+                OnUpdateSessionInfo?.Invoke(ActiveSession.Name, ActiveSession.Code);
                 Logger.Log($"세션 생성 완료:{ActiveSession.Name} - {ActiveSession.Code}");
             }
             catch (Exception ex)
@@ -86,6 +90,9 @@ namespace LittelSword.Network
                 // 퀵 조인 시도
                 ActiveSession = await MultiplayerService.Instance.MatchmakeSessionAsync(joinOptions,
                     sessionOptions);
+
+                OnUpdateSessionInfo?.Invoke(ActiveSession.Name, ActiveSession.Code);
+
                 Logger.Log($"세션 조인 완료:{ActiveSession.Name} - {ActiveSession.Code}");
             }
             catch (Exception ex)
@@ -98,6 +105,11 @@ namespace LittelSword.Network
             NetworkManager.Singleton.SceneManager.LoadScene(BATTLE_SCENE_NAME, LoadSceneMode.Single);
         }
 
+        public async void LeaveSession()
+        {
+            await ActiveSession.LeaveAsync();
+            SceneManager.LoadScene(LOBBY_SCENE_NAME, LoadSceneMode.Single);
+        }
         #endregion
     }
 

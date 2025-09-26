@@ -6,7 +6,7 @@ namespace LittelSword.Common
     {
         // 싱글턴 인스턴스
         private static T instance;
-        private static T Instance
+        public static T Instance
         {
             get
             {

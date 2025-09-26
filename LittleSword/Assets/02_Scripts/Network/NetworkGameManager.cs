@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 using Logger = LittelSword.Common.Logger;
 using Random = UnityEngine.Random;
 
@@ -10,6 +11,7 @@ namespace LittelSword.Network
         [SerializeField] private GameObject enemyPrefab;
         [SerializeField] private Transform[] spawnPoints;
         [SerializeField] private GameObject playerPrefab;
+        [SerializeField] private Button leaveSessionButton;
 
         private void Start()
         {
@@ -24,6 +26,21 @@ namespace LittelSword.Network
 
             //NetworkManager.Singleton.OnServerStarted += SpawnEnemies;
         }
+        private void OnEnable()
+        {
+            leaveSessionButton.onClick.AddListener(LeaveSession);
+        }
+        
+
+        private void OnDisable()
+        {
+            leaveSessionButton.onClick.RemoveAllListeners();
+        }
+        private void LeaveSession()
+        {
+            MultiplayerSessionManager.Instance.LeaveSession();
+        }
+
         private void OnDestroy()
         {
             if (NetworkManager.Singleton == null)
